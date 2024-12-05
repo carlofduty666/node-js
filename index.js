@@ -1,50 +1,84 @@
-const http = require('http');
+const http = require('http'); // modulo que permite crear un servidor
+const path = require('path'); // modulo que permite trabajar con rutas
+const fs = require('fs'); // modulo que permite leer archivos
+
+const { connectDB } = require('./db/db.js');
+
+// console.log(__dirname); // indica la ruta del directorio actual
+// console.log(__filename); // indica la ruta del archivo actual
+
+function readFiles(response, filePath, mimeType = 'text/html', codigoHTTP = 200) {
+  fs.readFile(filePath, (error, content) => { // lee el archivo y lo muestra en el navegador
+    if (!error) {
+      response.writeHead(codigoHTTP, {'Content-type': mimeType})
+      response.end(content);
+    } else {
+      const filePath = path.join(__dirname, '/views/http-screens/500.html')
+      readFiles(response, filePath, codigoHTTP = 500);
+    }
+  });
+}
 
 const server = http.createServer(function (request, response) {
-  if (request.url === '/' ) {
-    // console.log('Esta es la pagina principal')
-    response.writeHead(200, {'Content-type': 'text/html'})
-    response.end(`
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Home</title>
-      </head>
-      <body>
-      <h1>Esta es la pagina principal</h1>
-      <p> But i'd rather be fundametally between your legs, your hands and the rough grass of your thighs.<br>
-      i really enjoyed die Nacht bei dir.</p>
-
-      <img src="https://media.mutualart.com/Images/2021_03/02/14/145822677/e3bc78ba-83f0-46d0-bd20-fa068a91d0cc.Jpeg">
-        
-      </body>
-      </html>
-    `
-    )
-  } else if (request.url === '/pepe' ) {
-    console.log('Evidencia de la pagina de Pepe')
-    response.end(`<!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Home</title>
-      </head>
-      <body>
-      <h1>Esta es la pagina de Pepe</h1>
-
-      <img src="https://banner2.cleanpng.com/20240403/kay/transparent-pepe-the-frog-cartoon-frog-hanging-from-stick-sad-expression660db9ca00e2b9.32743919.webp">
-        
-      </body>
-      </html>
-    `)
-
+  console.log(`Requested URL: ${request.url}`);
+  if (request.url === '/') {
+    const filePath = path.join(__dirname, '/views/home.html') // ruta de la carpeta views y el archivo home.html
+    readFiles(response, filePath);
+  }
+  
+  else if (request.url === '/login' ) {
+    console.log('Login page');
+    const filePath = path.join(__dirname, '/views/login.html');
+    readFiles(response, filePath);
   }
 
-})
+  else if ( request.url === '/register' ) {
+    console.log('Register page');
+    const filePath = path.join(__dirname, '/views/register.html');
+    readFiles(response, filePath);
+  }
+  
+  else if ( request.url === '/style.css' ) {
+    const filePath = path.join(__dirname, '/views/assets/css/style.css');
+    readFiles(response, filePath, mimeType = 'text/css');
+  }
 
-server.listen(3000, () => {
-  console.log('Servidor escuchando en el puerto: http://localhost:3000')
-})
+  else if ( request.url === '/javascript' ) {
+    const filePath = path.join(__dirname, '/views/assets/js/app.js');
+    readFiles(response, filePath, mimeType = 'text/javascript');
+  }
+
+  // else if (request.url.match(/.(css)$/)) {
+  //   const filePath = path.join( __dirname, `views\assets${request.url}`);
+  //     readFiles(response, filePath, mimeType = 'text/css', 500);
+  // }
+
+  // else if (request.url.match(/.(js)$/)) {
+  //   const filePath = path.join( __dirname, `/views/assets/js/${request.url}`);
+  //     readFiles(response, filePath, mimeType = 'text/javascript', 500);
+  // }
+
+  // if (request.url.match(/.(html)$/)) {
+    //   const filePath = path.join(__dirname, `/views/${request.url}`);
+    //     readFiles(response, filePath, mimeType = 'text/html', 500);
+    // }
+
+  // else if (request.url.match(/.(css)$/)) {
+  //     const filePath = path.join(__dirname, `/views/assets/css/${request.url}`);
+  //     readFiles(response, filePath, mimeType = "text/css");
+  // }
+  
+  
+
+  else {
+    const filePath = path.join(__dirname, '/views/http-screens/404.html');
+    readFiles(response, filePath, codigoHTTP = 404);
+  }
+
+});
+
+connectDB().then( () => {
+  server.listen(3000, () => {
+    console.log('Servidor escuchando en el puerto: http://localhost:3000')
+  });
+});
