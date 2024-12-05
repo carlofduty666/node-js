@@ -4,8 +4,8 @@ const fs = require('fs'); // modulo que permite leer archivos
 
 const { connectDB } = require('./db/db.js');
 
-// console.log(__dirname); // indica la ruta del directorio actual
-// console.log(__filename); // indica la ruta del archivo actual
+const { createData, readData, deleteData, updateData } = require('./models/libros.js');
+
 
 function readFiles(response, filePath, mimeType = 'text/html', codigoHTTP = 200) {
   fs.readFile(filePath, (error, content) => { // lee el archivo y lo muestra en el navegador
@@ -79,6 +79,13 @@ const server = http.createServer(function (request, response) {
 
 connectDB().then( () => {
   server.listen(3000, () => {
+    updateData('67522ad9cc4ad6b192bca59e', {
+      'name': 'A Recherche du Temps Perdu 6: La Fugitiva',
+      'author': 'Marcel P.'
+    }) 
+    })
+    readData().then((data) => {
+      console.log(data)
+    })
     console.log('Servidor escuchando en el puerto: http://localhost:3000')
   });
-});
